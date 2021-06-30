@@ -27,12 +27,12 @@ export default {
       default: 'a'
     },
     custom: Boolean,
-    exact: Boolean,
+    exact: Boolean, // 目标路径和当前路径完全匹配
     exactPath: Boolean,
     append: Boolean,
     replace: Boolean,
-    activeClass: String,
-    exactActiveClass: String,
+    activeClass: String, // 目标路径包含当前路径
+    exactActiveClass: String, // 目标路径和当前路径完全匹配
     ariaCurrentValue: {
       type: String,
       default: 'page'
@@ -45,12 +45,17 @@ export default {
   render (h: Function) {
     const router = this.$router
     const current = this.$route
+
+    // 会根据目标路径和当前路径，规范化 location
+    // 然后使用 match 匹配出一条路由
+    // 在根据当前的 mode、base、fullPath 计算出 href
     const { location, route, href } = router.resolve(
       this.to,
       current,
       this.append
     )
 
+    // 对样式类的处理
     const classes = {}
     const globalActiveClass = router.options.linkActiveClass
     const globalExactActiveClass = router.options.linkExactActiveClass
@@ -72,6 +77,7 @@ export default {
       ? createRoute(null, normalizeLocation(route.redirectedFrom), null, router)
       : route
 
+    // 详见 isSameRoute isIncludedRoute 的实现
     classes[exactActiveClass] = isSameRoute(current, compareTarget, this.exactPath)
     classes[activeClass] = this.exact || this.exactPath
       ? classes[exactActiveClass]
@@ -79,6 +85,8 @@ export default {
 
     const ariaCurrentValue = classes[exactActiveClass] ? this.ariaCurrentValue : null
 
+    // 事件守卫
+    // 实际上所有的事件触发都会使用 replace or push
     const handler = e => {
       if (guardEvent(e)) {
         if (this.replace) {
@@ -148,11 +156,13 @@ export default {
       }
     }
 
+    // 默认渲染 a 标签，然后把事件和 href 绑定在 a 标签上
     if (this.tag === 'a') {
       data.on = on
       data.attrs = { href, 'aria-current': ariaCurrentValue }
     } else {
       // find the first <a> child and apply listener and href
+      // 否则，找到内部的第一个 a 标签来绑定事件和 href
       const a = findAnchor(this.$slots.default)
       if (a) {
         // in case the <a> is a static node
@@ -180,6 +190,7 @@ export default {
         aAttrs.href = href
         aAttrs['aria-current'] = ariaCurrentValue
       } else {
+        // 否则，将事件绑定在自身
         // doesn't have <a> child, apply listener to self
         data.on = on
       }
@@ -189,6 +200,7 @@ export default {
   }
 }
 
+// 这个函数避免了一些可能导致浏览器刷新的操作
 function guardEvent (e) {
   // don't redirect with control keys
   if (e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) return
@@ -208,6 +220,7 @@ function guardEvent (e) {
   return true
 }
 
+// 递归查找子节点中的第一个 a 标签
 function findAnchor (children) {
   if (children) {
     let child
