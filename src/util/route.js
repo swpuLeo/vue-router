@@ -70,6 +70,9 @@ function getFullPath (
   return (path || '/') + stringify(query) + hash
 }
 
+// 判断两个路由是否相等
+// 1. path hash query
+// 2. name hash query params
 export function isSameRoute (a: Route, b: ?Route, onlyPath: ?boolean): boolean {
   if (b === START) {
     return a === b
@@ -93,6 +96,13 @@ export function isSameRoute (a: Route, b: ?Route, onlyPath: ?boolean): boolean {
   }
 }
 
+// 判断两个对象相等（需要能够手写）
+// 1. 判断 a b 的存在
+// 2. 对 a b 的 keys 进行排序
+// 3. 判断 keys 的长度
+// 4. 每一个位置的 aKey 和 bKey 相等性
+// 5. 每一个位置的 aKey bKey 对应的 aVal bVal 的相等性
+// 6. val 为对象，则递归判断
 function isObjectEqual (a = {}, b = {}): boolean {
   // handle null value #1566
   if (!a || !b) return a === b
@@ -116,6 +126,10 @@ function isObjectEqual (a = {}, b = {}): boolean {
   })
 }
 
+// 判断路由 a 包含路由 b
+// 1、a.indexOf(b) === 0
+// 2、b 没有 hash or a b hash 相等
+// 3、b 的 query 都在 a 中
 export function isIncludedRoute (current: Route, target: Route): boolean {
   return (
     current.path.replace(trailingSlashRE, '/').indexOf(

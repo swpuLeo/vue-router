@@ -17,6 +17,7 @@ export default {
 
     // directly use parent context's createElement() function
     // so that components rendered by router-view can resolve named slots
+    // TODO
     const h = parent.$createElement
     const name = props.name
     const route = parent.$route
@@ -24,6 +25,8 @@ export default {
 
     // determine current view depth, also check to see if the tree
     // has been toggled inactive but kept-alive.
+    // depth 从当前组件实例沿 parent 链往上找，直到根组件
+    // 遇到一个 router-view depth 就加一
     let depth = 0
     let inactive = false
     while (parent && parent._routerRoot !== parent) {
@@ -55,7 +58,10 @@ export default {
       }
     }
 
+    // 根据层级匹配到一条 RouteRecord
+    // 因为 matched 的顺序也是 父组件 -> 子组件
     const matched = route.matched[depth]
+    // 拿到要渲染的组件
     const component = matched && matched.components[name]
 
     // render empty node if no matched route or no config component
@@ -69,6 +75,8 @@ export default {
 
     // attach instance registration hook
     // this will be called in the instance's injected lifecycle hooks
+    // 给当前路由注册当前的组件实例
+    // 在全局混入的钩子 beforeCreate 里调用
     data.registerRouteInstance = (vm, val) => {
       // val could be undefined for unregistration
       const current = matched.instances[name]
@@ -112,6 +120,7 @@ export default {
       fillPropsinData(component, data, route, configProps)
     }
 
+    // 渲染
     return h(component, data, children)
   }
 }

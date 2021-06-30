@@ -102,7 +102,7 @@ export class History {
       route,
       () => {
         // 路由切换完成会依次执行：
-        // 1、更新路由
+        // 1、更新路由，从而让订阅了 route 对象的 router-view 重现渲染
         // 2、回调 onComplete（pushState & handleScroll）
         // 3、确认URL（如果不一致的话）
         // 4、afterEach

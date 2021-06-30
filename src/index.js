@@ -139,6 +139,7 @@ export default class VueRouter {
 
     history.listen(route => {
       this.apps.forEach(app => {
+        // 更新挂载到根组件的路由
         app._route = route
       })
     })
